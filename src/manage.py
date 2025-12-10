@@ -6,6 +6,13 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    # Use PyMySQL as a drop-in replacement for mysqlclient
+    try:
+        import pymysql
+        pymysql.install_as_MySQLdb()
+    except ImportError:
+        pass  # PyMySQL not installed, probably running locally with SQLite
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'oauth_app.settings')
     try:
         from django.core.management import execute_from_command_line
