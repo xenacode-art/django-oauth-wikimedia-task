@@ -15,14 +15,13 @@ Django web app with OAuth authentication for Wikimedia wikis. Built during my Ou
 ## Requirements
 
 - Python 3.11 or newer
-- A Wikimedia OAuth consumer (I'll show you how to get one)
-
+- A Wikimedia OAuth consumer
 ## Getting started
 
 Clone this repo and create a virtual environment:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/xenacode-art/django-oauth-wikimedia-task
 cd my-first-django-oauth-app
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
