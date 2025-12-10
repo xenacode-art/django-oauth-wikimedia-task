@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile - My first Django OAuth app</title>
+</head>
+<body>
+    <h1>Profile</h1>
+    <p>You are logged in as: <strong>{{ user }}</strong></p>
+    <p>Username: {{ user.username }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p><a href="/">Back to Home</a></p>
+</body>
+</html>

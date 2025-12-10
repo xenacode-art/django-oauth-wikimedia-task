@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - My first Django OAuth app</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <p>Click the button below to login with your Wikimedia account:</p>
+    <a href="{% url 'social:begin' 'mediawiki' %}">Login with Wikimedia</a>
+</body>
+</html>

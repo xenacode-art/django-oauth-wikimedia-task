@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My first Django OAuth app</title>
+</head>
+<body>
+    <h1>My first Django OAuth app</h1>
+    <p>Welcome! This is a Django app with Wikimedia OAuth integration.</p>
+    <p><a href="{% url 'login' %}">Login with Wikimedia</a></p>
+    <p><a href="{% url 'profile' %}">View Profile</a></p>
+</body>
+</html>
