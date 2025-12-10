@@ -4,6 +4,8 @@ Django web app with OAuth authentication for Wikimedia wikis. Built during my Ou
 
 **Live deployment:** https://django-oauth-erik.toolforge.org
 
+**Repository:** Clean git history with automated deployment via GitHub Actions
+
 ## What it does
 
 - Lets users log in with their Wikimedia account
