@@ -7,6 +7,10 @@ path = os.path.dirname(os.path.abspath(__file__))
 if path not in sys.path:
     sys.path.insert(0, path)
 
+# Use PyMySQL as a drop-in replacement for mysqlclient
+import pymysql
+pymysql.install_as_MySQLdb()
+
 # Set the Django settings module
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'oauth_app.settings')
 
