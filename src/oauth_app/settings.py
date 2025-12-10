@@ -82,12 +82,33 @@ WSGI_APPLICATION = 'oauth_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use MariaDB in production (Toolforge), SQLite locally
+if os.environ.get('TOOLFORGE_DEPLOYMENT'):
+    import configparser
+    config = configparser.ConfigParser()
+    config.read(os.path.expanduser('~/replica.my.cnf'))
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 's57230__django_oauth_erik_p',
+            'USER': config['client']['user'],
+            'PASSWORD': config['client']['password'],
+            'HOST': 'tools.db.svc.wikimedia.cloud',
+            'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+            }
+        }
     }
-}
+else:
+    # Local development with SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
