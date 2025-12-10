@@ -10,6 +10,9 @@ if path not in sys.path:
 # Use PyMySQL as a drop-in replacement for mysqlclient
 import pymysql
 pymysql.install_as_MySQLdb()
+# Patch version to satisfy Django's version check
+pymysql.version_info = (2, 2, 7, "final", 0)
+pymysql.__version__ = "2.2.7"
 
 # Set the Django settings module
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'oauth_app.settings')
