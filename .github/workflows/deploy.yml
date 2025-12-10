@@ -11,18 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Decode SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.TOOLFORGE_SSH_KEY }}" | base64 -d > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
       - name: Deploy to Toolforge
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: login.toolforge.org
           username: ${{ secrets.TOOLFORGE_USER }}
-          key_path: ~/.ssh/id_rsa
+          key: ${{ secrets.TOOLFORGE_SSH_KEY }}
           script: |
             become django-oauth-erik << 'BECOME_EOF'
             cd ~/www/python
