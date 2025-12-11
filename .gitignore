@@ -4,3 +4,8 @@ __pycache__/
 venv/
 db.sqlite3
 .env
+
+# Documentation files (keep local only)
+IMPLEMENTATION_GUIDE.md
+DEPLOYMENT_CHECKLIST.md
+CHANGES_SUMMARY.md
