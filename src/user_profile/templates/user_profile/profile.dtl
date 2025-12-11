@@ -2,21 +2,83 @@
 <html>
 <head>
     <title>Profile - My first Django OAuth app</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .contribution {
+            border-left: 3px solid #36c;
+            padding: 10px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .contribution-title {
+            font-weight: bold;
+            color: #36c;
+        }
+        .contribution-meta {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
     <h1>Profile</h1>
     <p>You are logged in as: <strong>{{ user }}</strong></p>
-    <p>Username: {{ user.username }}</p>
+    <p>Django Username: {{ user.username }}</p>
     <p>Email: {{ user.email }}</p>
 
     {% if has_oauth %}
     <h2>OAuth Status</h2>
-    <p style="color: green;">✓ Connected with Wikimedia OAuth</p>
-    <p><em>Your account is authenticated and can be used with Pywikibot for automated wiki operations.</em></p>
-    {% else %}
-    <p style="color: red;">✗ No OAuth credentials found</p>
+    <p class="success">✓ Connected with Wikimedia OAuth</p>
+    <p><em>Using mwclient for multi-user safe API operations.</em></p>
+
+    <div class="info-box">
+        <h3>Wikimedia Account Information</h3>
+        {% if api_error %}
+        <p class="error">Error fetching data: {{ api_error }}</p>
+        {% else %}
+        <p><strong>Wikimedia Username:</strong> {{ username }}</p>
+        <p><strong>Edit Count:</strong> {{ edit_count }}</p>
+        <p><strong>User Groups:</strong> {{ user_groups|join:", " }}</p>
+        {% endif %}
+    </div>
+
+    {% if contributions %}
+    <h3>Recent Contributions</h3>
+    {% for contrib in contributions %}
+    <div class="contribution">
+        <div class="contribution-title">{{ contrib.title }}</div>
+        <div class="contribution-meta">
+            Revision ID: {{ contrib.revid }} |
+            Time: {{ contrib.timestamp }} |
+            Size: {{ contrib.size }} bytes
+        </div>
+        {% if contrib.comment %}
+        <div style="margin-top: 5px;">
+            <em>Summary: {{ contrib.comment }}</em>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
     {% endif %}
 
-    <p><a href="/">Back to Home</a></p>
+    {% else %}
+    <p class="error">✗ No OAuth credentials found</p>
+    <p><a href="/oauth/login/mediawiki/">Login with Wikimedia OAuth</a></p>
+    {% endif %}
+
+    <p style="margin-top: 30px;"><a href="/">← Back to Home</a></p>
 </body>
 </html>

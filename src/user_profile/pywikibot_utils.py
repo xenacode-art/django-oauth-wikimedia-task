@@ -3,6 +3,28 @@ Utility functions for integrating Pywikibot with Django OAuth credentials.
 
 This module provides functions to create Pywikibot instances using
 OAuth credentials from Django's social-auth session.
+
+⚠️ WARNING: MULTI-USER LIMITATION ⚠️
+Pywikibot caches credentials globally, which causes issues in multi-user
+web applications where multiple users are authenticated simultaneously.
+
+PROBLEM:
+- When User A logs in, Pywikibot caches their OAuth credentials
+- When User B logs in, Pywikibot may still use User A's cached credentials
+- This causes authentication failures and wrong-user actions
+
+SOLUTION FOR PRODUCTION:
+Use mwclient_utils.py instead for OAuth-authenticated operations in web apps.
+Pywikibot is great for single-user bots, but mwclient is designed for
+concurrent multi-user environments.
+
+This module is kept for:
+- Learning purposes
+- Single-user/testing scenarios
+- Non-OAuth Pywikibot operations (like reading wiki replicas)
+
+See: https://github.com/Wikimedia-Suomi/PendingChangesBot-ng discussions
+Credit: Issue discovered by Zache during Outreachy internship
 """
 
 import pywikibot
