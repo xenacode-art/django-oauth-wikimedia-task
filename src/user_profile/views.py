@@ -13,15 +13,9 @@ def index(request):
 def profile(request):
     context = {}
 
-    # Try to fetch Pywikibot data if user has OAuth credentials
+    # Check if user has OAuth credentials
     try:
         social_auth = UserSocialAuth.objects.get(user=request.user, provider='mediawiki')
-
-        # Get OAuth token info
-        extra_data = social_auth.extra_data
-        access_token = extra_data.get('access_token', {})
-
-        context['oauth_token'] = access_token.get('oauth_token', 'N/A')
         context['has_oauth'] = True
 
         # Optionally fetch edit count and contributions

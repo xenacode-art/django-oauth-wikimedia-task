@@ -10,10 +10,9 @@
     <p>Email: {{ user.email }}</p>
 
     {% if has_oauth %}
-    <h2>OAuth Information</h2>
-    <p>OAuth Token: <code>{{ oauth_token }}</code></p>
+    <h2>OAuth Status</h2>
     <p style="color: green;">✓ Connected with Wikimedia OAuth</p>
-    <p><em>Your OAuth credentials can be used with Pywikibot for automated wiki operations.</em></p>
+    <p><em>Your account is authenticated and can be used with Pywikibot for automated wiki operations.</em></p>
     {% else %}
     <p style="color: red;">✗ No OAuth credentials found</p>
     {% endif %}
