@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'social_django',
     'user_profile',
+    'wiki_replica',
 ]
 
 MIDDLEWARE = [
@@ -84,31 +85,57 @@ WSGI_APPLICATION = 'oauth_app.wsgi.application'
 
 # Use MariaDB in production (Toolforge), SQLite locally
 if os.environ.get('TOOLFORGE_DEPLOYMENT'):
-    import configparser
-    config = configparser.ConfigParser()
-    config.read(os.path.expanduser('~/replica.my.cnf'))
+    # Toolforge database configuration
+    # Using environment variables that are automatically set by Toolforge:
+    # - TOOL_TOOLSDB_USER: Username for tools database
+    # - TOOL_TOOLSDB_PASSWORD: Password for tools database
+    # Alternatively, read from ~/replica.my.cnf using read_default_file
+
+    db_name = os.environ.get('TOOLSDB_NAME', 's57230__django_oauth_erik')
+    wiki_code = os.environ.get('WIKI_REPLICA', 'metawiki')  # e.g., 'metawiki', 'enwiki', 'commonswiki'
 
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 's57230__django_oauth_erik_p',
-            'USER': config['client']['user'],
-            'PASSWORD': config['client']['password'],
+            'NAME': db_name,  # Private database (no _p suffix)
             'HOST': 'tools.db.svc.wikimedia.cloud',
             'PORT': '3306',
             'OPTIONS': {
+                # Read credentials from ~/replica.my.cnf
+                'read_default_file': os.path.expanduser('~/replica.my.cnf'),
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                 'charset': 'utf8mb4',
-            }
+            },
+        },
+        'wiki_replica': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': f'{wiki_code}_p',  # Wiki replica databases have _p suffix
+            'HOST': f'{wiki_code}.analytics.db.svc.wikimedia.cloud',
+            'PORT': '3306',
+            'OPTIONS': {
+                # Read credentials from ~/replica.my.cnf
+                'read_default_file': os.path.expanduser('~/replica.my.cnf'),
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                'charset': 'utf8mb4',
+            },
         }
     }
 else:
     # Local development with SQLite
+    # Note: Wiki replica functionality won't work locally without SSH tunnel
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
+        },
+        'wiki_replica': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'wiki_replica.sqlite3',
         }
     }
+
+# Database routers
+DATABASE_ROUTERS = ['wiki_replica.router.WikiReplicaRouter']
 
 
 # Password validation
