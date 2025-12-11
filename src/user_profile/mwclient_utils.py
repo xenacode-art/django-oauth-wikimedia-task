@@ -89,7 +89,10 @@ def get_mwclient_for_user(user, wiki_url='https://meta.wikimedia.org'):
 
 def get_user_info(user, wiki_url='https://meta.wikimedia.org'):
     """
-    Get user information including edit count using OAuth credentials.
+    Get user information including edit count using public API (no OAuth needed).
+
+    This function uses the public MediaWiki API to fetch user data.
+    OAuth is not needed since this information is publicly available.
 
     Args:
         user: Django User object with social auth credentials
@@ -106,23 +109,56 @@ def get_user_info(user, wiki_url='https://meta.wikimedia.org'):
         >>> info = get_user_info(request.user)
         >>> print(f"Edit count: {info['editcount']}")
     """
-    site = get_mwclient_for_user(user, wiki_url)
+    # Get the Wikimedia username from social auth
+    from social_django.models import UserSocialAuth
+    try:
+        social_auth = UserSocialAuth.objects.get(user=user, provider='mediawiki')
+        username = social_auth.extra_data.get('username', user.username)
+    except UserSocialAuth.DoesNotExist:
+        username = user.username
 
-    # Query the API for user info
-    result = site.api('query', meta='userinfo', uiprop='editcount|registration|groups')
-    user_info = result['query']['userinfo']
+    # Use public API (no OAuth) to get user info
+    from urllib.parse import urlparse
+    import requests
 
+    parsed = urlparse(wiki_url)
+    api_url = f"{parsed.scheme}://{parsed.netloc}/w/api.php"
+
+    params = {
+        'action': 'query',
+        'list': 'users',
+        'ususers': username,
+        'usprop': 'editcount|registration|groups',
+        'format': 'json'
+    }
+
+    response = requests.get(api_url, params=params)
+    data = response.json()
+
+    if 'query' in data and 'users' in data['query'] and len(data['query']['users']) > 0:
+        user_data = data['query']['users'][0]
+        return {
+            'name': user_data.get('name', username),
+            'editcount': user_data.get('editcount', 0),
+            'registration': user_data.get('registration'),
+            'groups': user_data.get('groups', [])
+        }
+
+    # Fallback if API call fails
     return {
-        'name': user_info.get('name'),
-        'editcount': user_info.get('editcount', 0),
-        'registration': user_info.get('registration'),
-        'groups': user_info.get('groups', [])
+        'name': username,
+        'editcount': 0,
+        'registration': None,
+        'groups': []
     }
 
 
 def get_user_contributions(user, total=10, wiki_url='https://meta.wikimedia.org'):
     """
-    Get recent contributions for a user using their OAuth credentials.
+    Get recent contributions for a user using public API (no OAuth needed).
+
+    This function uses the public MediaWiki API to fetch user contributions.
+    OAuth is not needed since contributions are publicly visible.
 
     Args:
         user: Django User object with social auth credentials
@@ -142,30 +178,43 @@ def get_user_contributions(user, total=10, wiki_url='https://meta.wikimedia.org'
         >>> for contrib in contribs:
         ...     print(f"{contrib['title']}: {contrib['comment']}")
     """
-    site = get_mwclient_for_user(user, wiki_url)
+    # Get the Wikimedia username from social auth
+    from social_django.models import UserSocialAuth
+    try:
+        social_auth = UserSocialAuth.objects.get(user=user, provider='mediawiki')
+        username = social_auth.extra_data.get('username', user.username)
+    except UserSocialAuth.DoesNotExist:
+        username = user.username
 
-    # Get authenticated user's username
-    user_info = site.api('query', meta='userinfo')
-    username = user_info['query']['userinfo']['name']
+    # Use public API (no OAuth) to get contributions
+    from urllib.parse import urlparse
+    import requests
 
-    # Query user contributions
-    result = site.api(
-        'query',
-        list='usercontribs',
-        ucuser=username,
-        uclimit=total,
-        ucprop='title|ids|timestamp|comment|size'
-    )
+    parsed = urlparse(wiki_url)
+    api_url = f"{parsed.scheme}://{parsed.netloc}/w/api.php"
+
+    params = {
+        'action': 'query',
+        'list': 'usercontribs',
+        'ucuser': username,
+        'uclimit': total,
+        'ucprop': 'title|ids|timestamp|comment|size',
+        'format': 'json'
+    }
+
+    response = requests.get(api_url, params=params)
+    data = response.json()
 
     contributions = []
-    for contrib in result['query']['usercontribs']:
-        contributions.append({
-            'title': contrib.get('title'),
-            'revid': contrib.get('revid'),
-            'timestamp': contrib.get('timestamp'),
-            'comment': contrib.get('comment', ''),
-            'size': contrib.get('size', 0)
-        })
+    if 'query' in data and 'usercontribs' in data['query']:
+        for contrib in data['query']['usercontribs']:
+            contributions.append({
+                'title': contrib.get('title'),
+                'revid': contrib.get('revid'),
+                'timestamp': contrib.get('timestamp'),
+                'comment': contrib.get('comment', ''),
+                'size': contrib.get('size', 0)
+            })
 
     return contributions
 
