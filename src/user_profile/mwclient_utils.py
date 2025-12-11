@@ -60,11 +60,12 @@ def get_mwclient_for_user(user, wiki_url='https://meta.wikimedia.org'):
         )
 
     # Extract host and path from wiki_url
-    # Example: 'https://meta.wikimedia.org' -> host='meta.wikimedia.org', path='/'
+    # Example: 'https://meta.wikimedia.org' -> host='meta.wikimedia.org', path='/w/'
     from urllib.parse import urlparse
     parsed = urlparse(wiki_url)
     host = parsed.netloc
-    path = parsed.path if parsed.path else '/'
+    # Wikimedia sites use /w/ as the path to api.php
+    path = '/w/'
     scheme = parsed.scheme
 
     # Get OAuth consumer credentials from Django settings
