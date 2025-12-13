@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wiki Search - Django OAuth App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .search-box {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .search-box input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .search-box button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #36c;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .search-box button:hover {
+            background: #25a;
+        }
+        .info-text {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .result-item {
+            border-left: 3px solid #36c;
+            padding: 15px;
+            margin: 15px 0;
+            background: #f9f9f9;
+        }
+        .result-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #36c;
+            margin-bottom: 5px;
+        }
+        .result-meta {
+            font-size: 14px;
+            color: #666;
+        }
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .stats {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wiki Replica Search</h1>
+
+    <div class="search-box">
+        <form method="GET" action="{% url 'search' %}">
+            <input
+                type="text"
+                name="q"
+                placeholder="Search for wiki pages..."
+                value="{{ query }}"
+                autofocus
+            >
+            <button type="submit">Search</button>
+            <div class="info-text">
+                Searching in: <strong>{{ wiki_name }}</strong> (namespace: {{ namespace }})
+            </div>
+        </form>
+    </div>
+
+    {% if query %}
+    <div class="results">
+        <h2>Search Results for "{{ query }}"</h2>
+
+        {% if results %}
+        <div class="stats">
+            Found <strong>{{ results|length }}</strong> result(s)
+        </div>
+
+        {% for page in results %}
+        <div class="result-item">
+            <div class="result-title">{{ page.page_title }}</div>
+            <div class="result-meta">
+                Page ID: {{ page.page_id }} |
+                Namespace: {{ page.page_namespace }} |
+                Length: {{ page.page_len }} bytes |
+                {% if page.page_is_redirect %}
+                <span style="color: #c93;">REDIRECT</span>
+                {% else %}
+                <span style="color: #3c9;">ARTICLE</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <div class="no-results">
+            No results found for "{{ query }}"
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <p style="margin-top: 30px;">
+        <a href="/">← Back to Home</a>
+        {% if user.is_authenticated %}
+        | <a href="{% url 'profile' %}">Profile</a>
+        {% endif %}
+    </p>
+</body>
+</html>

@@ -1,12 +1,97 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My first Django OAuth app</title>
+    <title>Django OAuth App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .feature-box h3 {
+            margin-top: 0;
+            color: #36c;
+        }
+        .nav-links {
+            margin: 30px 0;
+        }
+        .nav-links a {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 24px;
+            background: #36c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .nav-links a:hover {
+            background: #25a;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>My first Django OAuth app</h1>
-    <p>Welcome! This is a Django app with Wikimedia OAuth integration.</p>
-    <p><a href="{% url 'login' %}">Login with Wikimedia</a></p>
-    <p><a href="{% url 'profile' %}">View Profile</a></p>
+    <h1>Django OAuth for Wikimedia</h1>
+    <p class="subtitle">OAuth integration with Pywikibot and Wiki Replica access</p>
+
+    {% if user.is_authenticated %}
+    <div class="status">
+        <p>Welcome, <strong>{{ user.username }}</strong>!</p>
+    </div>
+    {% endif %}
+
+    <div class="nav-links">
+        {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}">Login with Wikimedia</a>
+        {% endif %}
+        <a href="{% url 'profile' %}">View Profile</a>
+        <a href="{% url 'search' %}">Search Wiki Pages</a>
+    </div>
+
+    <div class="feature-box">
+        <h3>Features</h3>
+        <ul>
+            <li>Wikimedia OAuth 1.0a authentication</li>
+            <li>mwclient integration for multi-user safe API operations</li>
+            <li>Wiki database replica access via Django ORM</li>
+            <li>User profile with edit count and contributions</li>
+            <li>Wiki page search functionality</li>
+        </ul>
+    </div>
+
+    <div class="feature-box">
+        <h3>About</h3>
+        <p>
+            This Django web application demonstrates OAuth integration with Wikimedia wikis,
+            including Pywikibot integration and MediaWiki database replica access.
+        </p>
+        <p>
+            Built as part of the Outreachy 2025 internship with Pywikibot.
+        </p>
+    </div>
 </body>
 </html>

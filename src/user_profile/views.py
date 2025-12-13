@@ -50,3 +50,42 @@ def profile(request):
 def login_oauth(request):
     context = {}
     return render(request, 'user_profile/login.dtl', context)
+
+
+def search(request):
+    """
+    Search wiki replica database for pages by title.
+    """
+    from wiki_replica.models import Page
+    from django.conf import settings
+    import os
+
+    context = {}
+
+    # Get wiki name from environment or settings
+    wiki_code = os.environ.get('WIKI_REPLICA', 'metawiki')
+    context['wiki_name'] = wiki_code
+    context['namespace'] = 0  # Main namespace
+
+    query = request.GET.get('q', '').strip()
+    context['query'] = query
+
+    if query:
+        # Search for pages in main namespace (0) containing the query string
+        # Replace spaces with underscores (MediaWiki convention)
+        search_term = query.replace(' ', '_')
+
+        try:
+            # Search for pages where title contains the search term
+            results = Page.objects.filter(
+                page_namespace=0,
+                page_title__icontains=search_term
+            ).order_by('page_title')[:50]  # Limit to 50 results
+
+            context['results'] = results
+        except Exception as e:
+            # Handle database errors gracefully
+            context['error'] = str(e)
+            context['results'] = []
+
+    return render(request, 'user_profile/search.dtl', context)
