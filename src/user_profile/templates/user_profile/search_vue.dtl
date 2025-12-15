@@ -3,6 +3,7 @@
 {% block title %}Wiki Search - Django OAuth App{% endblock %}
 
 {% block content %}
+{% verbatim %}
 <div id="app">
     <div class="card">
         <h2>Wiki Replica Search</h2>
@@ -53,6 +54,7 @@
         </div>
     </div>
 </div>
+{% endverbatim %}
 {% endblock %}
 
 {% block extra_scripts %}

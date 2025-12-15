@@ -31,6 +31,7 @@
 {% endblock %}
 
 {% block content %}
+{% verbatim %}
 <div id="app">
     <div class="card">
         <h2>Wiki Database Statistics</h2>
@@ -77,6 +78,7 @@
         </ul>
     </div>
 </div>
+{% endverbatim %}
 {% endblock %}
 
 {% block extra_scripts %}
