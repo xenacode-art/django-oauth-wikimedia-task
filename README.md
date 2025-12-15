@@ -185,7 +185,7 @@ See `IMPLEMENTATION_GUIDE.md` for:
 ## Tech Stack
 
 **Backend:**
-- Django 6.0
+- Django 5.1.4
 - Django REST Framework 3.15.2
 - social-auth-app-django 5.6.0
 - PyMySQL 1.1.1
