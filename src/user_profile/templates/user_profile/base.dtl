@@ -1,0 +1,168 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% trans "Django OAuth App" %}{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: opacity 0.2s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        input[type="text"], input[type="search"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background: #2ecc71;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .info {
+            background: #3498db;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        {% block extra_style %}{% endblock %}
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>{% trans "Django OAuth App" %}</h1>
+            <nav>
+                <a href="/">{% trans "Home" %}</a>
+                <a href="/search">{% trans "Search" %}</a>
+                <a href="/statistics">{% trans "Statistics" %}</a>
+                {% if user.is_authenticated %}
+                <a href="/profile">{% trans "Profile" %}</a>
+                {% else %}
+                <a href="/login">{% trans "Login" %}</a>
+                {% endif %}
+                <form method="post" action="{% url 'set_language' %}" style="display: inline; margin-left: 1.5rem;">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <select name="language" onchange="this.form.submit()" style="padding: 0.25rem; background: white; border: none; border-radius: 4px; cursor: pointer;">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% for lang_code, lang_name in LANGUAGES %}
+                        <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>
+                            {{ lang_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

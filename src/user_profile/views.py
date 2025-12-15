@@ -1,5 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.utils.translation import activate
+from django.conf import settings
 from social_django.models import UserSocialAuth
 
 # Use mwclient for production (thread-safe for multi-user apps)
@@ -16,35 +18,10 @@ def index(request):
 
 @login_required()
 def profile(request):
-    context = {}
-
-    # Check if user has OAuth credentials
-    try:
-        social_auth = UserSocialAuth.objects.get(user=request.user, provider='mediawiki')
-        context['has_oauth'] = True
-
-        # Fetch user info and contributions using mwclient (multi-user safe)
-        try:
-            # Get user information (includes edit count)
-            user_info = get_user_info(request.user)
-            context['edit_count'] = user_info['editcount']
-            context['username'] = user_info['name']
-            context['user_groups'] = user_info['groups']
-
-            # Get recent contributions
-            context['contributions'] = get_user_contributions(request.user, total=5)
-
-        except Exception as e:
-            context['api_error'] = str(e)
-            # Set defaults if API call fails
-            context['edit_count'] = 'N/A'
-            context['username'] = request.user.username
-            context['contributions'] = []
-
-    except UserSocialAuth.DoesNotExist:
-        context['has_oauth'] = False
-
-    return render(request, 'user_profile/profile.dtl', context)
+    """
+    Vue-powered profile page that fetches data from API.
+    """
+    return render(request, 'user_profile/profile_vue.dtl')
 
 
 def login_oauth(request):
@@ -54,38 +31,34 @@ def login_oauth(request):
 
 def search(request):
     """
-    Search wiki replica database for pages by title.
+    Vue-powered search page for wiki replica database.
     """
-    from wiki_replica.models import Page
-    from django.conf import settings
-    import os
+    return render(request, 'user_profile/search_vue.dtl')
 
-    context = {}
 
-    # Get wiki name from environment or settings
-    wiki_code = os.environ.get('WIKI_REPLICA', 'metawiki')
-    context['wiki_name'] = wiki_code
-    context['namespace'] = 0  # Main namespace
+def statistics(request):
+    """
+    Vue-powered statistics dashboard showing wiki database stats.
+    """
+    return render(request, 'user_profile/statistics.dtl')
 
-    query = request.GET.get('q', '').strip()
-    context['query'] = query
 
-    if query:
-        # Search for pages in main namespace (0) containing the query string
-        # Replace spaces with underscores (MediaWiki convention)
-        search_term = query.replace(' ', '_')
+def profile_vue(request):
+    """
+    Vue-powered profile page that fetches data from API.
+    """
+    return render(request, 'user_profile/profile_vue.dtl')
 
-        try:
-            # Search for pages where title contains the search term
-            results = Page.objects.filter(
-                page_namespace=0,
-                page_title__icontains=search_term
-            ).order_by('page_title')[:50]  # Limit to 50 results
 
-            context['results'] = results
-        except Exception as e:
-            # Handle database errors gracefully
-            context['error'] = str(e)
-            context['results'] = []
-
-    return render(request, 'user_profile/search.dtl', context)
+def set_language(request):
+    """
+    Change the user's language preference.
+    """
+    if request.method == 'POST':
+        language = request.POST.get('language')
+        if language and language in dict(settings.LANGUAGES).keys():
+            activate(language)
+            response = redirect(request.POST.get('next', '/'))
+            response.set_cookie(settings.LANGUAGE_COOKIE_NAME, language)
+            return response
+    return redirect('/')

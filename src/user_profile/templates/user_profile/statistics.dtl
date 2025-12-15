@@ -1,0 +1,122 @@
+{% extends "user_profile/base.dtl" %}
+
+{% block title %}Wiki Statistics - Django OAuth App{% endblock %}
+
+{% block extra_style %}
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.stat-label {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+{% endblock %}
+
+{% block content %}
+<div id="app">
+    <div class="card">
+        <h2>Wiki Database Statistics</h2>
+        <p style="color: #666; margin-top: 0.5rem;">Real-time statistics from the wiki replica database</p>
+    </div>
+
+    <div v-if="loading" class="loading">
+        Loading statistics...
+    </div>
+
+    <div v-if="error" class="error">
+        {{ error }}
+    </div>
+
+    <div v-if="!loading && stats" class="stats-grid">
+        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="stat-label">Total Pages</div>
+            <div class="stat-value">{{ formatNumber(stats.total_pages) }}</div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="stat-label">Content Pages</div>
+            <div class="stat-value">{{ formatNumber(stats.content_pages) }}</div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="stat-label">Redirects</div>
+            <div class="stat-value">{{ formatNumber(stats.redirects) }}</div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <div class="stat-label">Recent Changes</div>
+            <div class="stat-value">{{ formatNumber(stats.recent_changes_count) }}</div>
+        </div>
+    </div>
+
+    <div v-if="!loading && stats" class="card" style="margin-top: 2rem;">
+        <h3>About These Statistics</h3>
+        <ul style="margin-top: 1rem; line-height: 2;">
+            <li><strong>Total Pages:</strong> All pages in the wiki database across all namespaces</li>
+            <li><strong>Content Pages:</strong> Articles in the main namespace (excludes redirects)</li>
+            <li><strong>Redirects:</strong> Pages that redirect to other pages</li>
+            <li><strong>Recent Changes:</strong> Number of entries in the recent changes table (rolling window)</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            loading: true,
+            error: null,
+            stats: null
+        };
+    },
+    methods: {
+        async fetchStatistics() {
+            try {
+                const response = await fetch('/api/wiki/statistics/', {
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch statistics');
+                }
+
+                this.stats = await response.json();
+            } catch (err) {
+                this.error = err.message;
+            } finally {
+                this.loading = false;
+            }
+        },
+        formatNumber(num) {
+            return new Intl.NumberFormat().format(num);
+        }
+    },
+    mounted() {
+        this.fetchStatistics();
+    }
+}).mount('#app');
+</script>
+{% endblock %}

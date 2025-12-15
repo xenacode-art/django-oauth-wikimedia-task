@@ -42,14 +42,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
     'social_django',
     'user_profile',
     'wiki_replica',
+    'api',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -160,7 +165,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('fi', 'Finnish'),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 TIME_ZONE = 'UTC'
 
@@ -197,3 +211,24 @@ SOCIAL_AUTH_MEDIAWIKI_KEY = os.environ.get('MEDIAWIKI_CONSUMER_KEY', '')
 SOCIAL_AUTH_MEDIAWIKI_SECRET = os.environ.get('MEDIAWIKI_CONSUMER_SECRET', '')
 SOCIAL_AUTH_MEDIAWIKI_URL = 'https://meta.wikimedia.org/w/index.php'
 SOCIAL_AUTH_MEDIAWIKI_CALLBACK = os.environ.get('MEDIAWIKI_CALLBACK', 'http://127.0.0.1:8080/oauth/complete/mediawiki/')
+
+# REST Framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+# CORS configuration
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+    'https://django-oauth-erik.toolforge.org',
+]
+
+CORS_ALLOW_CREDENTIALS = True

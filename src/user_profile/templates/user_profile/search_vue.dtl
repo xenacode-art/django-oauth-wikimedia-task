@@ -1,0 +1,117 @@
+{% extends "user_profile/base.dtl" %}
+
+{% block title %}Wiki Search - Django OAuth App{% endblock %}
+
+{% block content %}
+<div id="app">
+    <div class="card">
+        <h2>Wiki Replica Search</h2>
+        <p style="color: #666; margin-top: 0.5rem;">Search pages in the wiki database</p>
+
+        <div style="margin-top: 1.5rem;">
+            <input
+                type="search"
+                v-model="searchQuery"
+                @input="onSearchInput"
+                placeholder="Type to search wiki pages..."
+                autofocus
+            />
+        </div>
+    </div>
+
+    <div v-if="searching" class="loading">
+        Searching...
+    </div>
+
+    <div v-if="error" class="error">
+        {{ error }}
+    </div>
+
+    <div v-if="results" class="card">
+        <h3>Search Results</h3>
+        <p style="color: #666; margin-bottom: 1rem;">
+            Found <strong>{{ results.count }}</strong> result(s) for "<strong>{{ results.query }}</strong>"
+        </p>
+
+        <div v-if="results.results.length === 0" style="text-align: center; padding: 2rem; color: #95a5a6;">
+            No results found
+        </div>
+
+        <div v-for="page in results.results" :key="page.page_id"
+             style="border-left: 3px solid #3498db; padding: 1rem; margin: 1rem 0; background: #f9f9f9;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #2c3e50;">
+                {{ page.page_title.replace(/_/g, ' ') }}
+            </div>
+            <div style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                Page ID: {{ page.page_id }} |
+                Namespace: {{ page.page_namespace }} |
+                Length: {{ page.page_len }} bytes |
+                <span :style="{ color: page.page_is_redirect ? '#e67e22' : '#27ae60' }">
+                    {{ page.page_is_redirect ? 'REDIRECT' : 'ARTICLE' }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            searchQuery: '',
+            searching: false,
+            error: null,
+            results: null,
+            searchTimeout: null
+        };
+    },
+    methods: {
+        onSearchInput() {
+            clearTimeout(this.searchTimeout);
+
+            if (this.searchQuery.trim().length < 2) {
+                this.results = null;
+                return;
+            }
+
+            this.searchTimeout = setTimeout(() => {
+                this.performSearch();
+            }, 500);
+        },
+        async performSearch() {
+            if (!this.searchQuery.trim()) return;
+
+            this.searching = true;
+            this.error = null;
+
+            try {
+                const params = new URLSearchParams({
+                    q: this.searchQuery,
+                    namespace: 0,
+                    limit: 50
+                });
+
+                const response = await fetch(`/api/wiki/search/?${params}`, {
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Search failed');
+                }
+
+                this.results = await response.json();
+            } catch (err) {
+                this.error = err.message;
+            } finally {
+                this.searching = false;
+            }
+        }
+    }
+}).mount('#app');
+</script>
+{% endblock %}

@@ -9,3 +9,22 @@ db.sqlite3
 IMPLEMENTATION_GUIDE.md
 DEPLOYMENT_CHECKLIST.md
 CHANGES_SUMMARY.md
+FEATURES.md
+SETUP.md
+
+# Test and coverage reports
+htmlcov/
+.coverage
+.pytest_cache/
+.mypy_cache/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

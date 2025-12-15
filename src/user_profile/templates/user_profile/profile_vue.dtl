@@ -1,0 +1,103 @@
+{% extends "user_profile/base.dtl" %}
+
+{% block title %}Profile - Django OAuth App{% endblock %}
+
+{% block content %}
+<div id="app">
+    <div class="card">
+        <h2>User Profile</h2>
+        <p>You are logged in as: <strong>{{ user.username }}</strong></p>
+    </div>
+
+    <div v-if="loading" class="loading">
+        Loading profile data...
+    </div>
+
+    <div v-if="error" class="error">
+        {{ error }}
+    </div>
+
+    <div v-if="!loading && profile" class="card">
+        <h3>Wikimedia Account Information</h3>
+        <div style="margin-top: 1rem;">
+            <p><strong>Username:</strong> {{ profile.username }}</p>
+            <p><strong>Edit Count:</strong> {{ profile.edit_count }}</p>
+            <p><strong>User Groups:</strong> {{ profile.groups.join(', ') }}</p>
+        </div>
+    </div>
+
+    <div v-if="!loading && contributions.length > 0" class="card">
+        <h3>Recent Contributions</h3>
+        <div v-for="contrib in contributions" :key="contrib.title" style="border-left: 3px solid #3498db; padding: 1rem; margin: 1rem 0; background: #f9f9f9;">
+            <div style="font-weight: bold; color: #3498db;">{{ contrib.title }}</div>
+            <div style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                {{ formatDate(contrib.timestamp) }} | {{ contrib.size }} bytes
+            </div>
+            <div v-if="contrib.comment" style="margin-top: 0.5rem;">
+                <em>{{ contrib.comment }}</em>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            loading: true,
+            error: null,
+            profile: null,
+            contributions: []
+        };
+    },
+    methods: {
+        async fetchProfile() {
+            try {
+                const response = await fetch('/api/user/profile/', {
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile data');
+                }
+
+                this.profile = await response.json();
+            } catch (err) {
+                this.error = err.message;
+            }
+        },
+        async fetchContributions() {
+            try {
+                const response = await fetch('/api/user/contributions/?limit=10', {
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch contributions');
+                }
+
+                this.contributions = await response.json();
+            } catch (err) {
+                console.error('Error fetching contributions:', err);
+            }
+        },
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+    },
+    async mounted() {
+        await Promise.all([
+            this.fetchProfile(),
+            this.fetchContributions()
+        ]);
+        this.loading = false;
+    }
+}).mount('#app');
+</script>
+{% endblock %}
