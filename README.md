@@ -1,6 +1,6 @@
 # Django OAuth for Wikimedia
 
-Production-ready boilerplate Django web app with OAuth authentication for Wikimedia wikis. Built during my Outreachy internship with Pywikibot.
+boilerplate Django web app with OAuth authentication for Wikimedia wikis. Built during my Outreachy internship with Pywikibot.
 
 **Live deployment:** https://django-oauth-erik.toolforge.org
 
