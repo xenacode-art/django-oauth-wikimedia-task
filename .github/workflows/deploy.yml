@@ -1,10 +1,11 @@
 name: Deploy to Toolforge
 
 on:
-  push:
-    branches:
-      - master
-  workflow_dispatch:
+  # Automatic deployment disabled - deploy manually via GitHub Actions tab
+  # push:
+  #   branches:
+  #     - master
+  workflow_dispatch:  # Manual trigger only
 
 jobs:
   deploy:
